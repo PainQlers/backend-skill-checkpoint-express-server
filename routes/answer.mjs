@@ -6,11 +6,10 @@ const answerRouter = Router();
 answerRouter.post("/:questionId/answers", async (req, res) => {
     const { questionId } = req.params;
     const { content } = req.body
-    const newAnswer = {
-      ...req.body
-    }
+
+    const trimmedContent = content?.trim();
   
-    if(!content || content.length > 300) {
+    if(!trimmedContent || trimmedContent.length > 300 || trimmedContent.length === 0) {
       return res.status(400).json({
         message: "Invalid request data."
       })
@@ -38,15 +37,9 @@ answerRouter.post("/:questionId/answers", async (req, res) => {
         `,
         [
           questionId,
-          newAnswer.content
+          trimmedContent
         ]
       );
-  
-      if(result.rowCount === 0) {
-        return res.status(404).json({
-          message: "Question not found."
-        })
-      }
   
       return res.status(201).json({
         message: "Answer created successfully."
@@ -70,7 +63,8 @@ answerRouter.get("/:questionId/answers", async (req, res) => {
   
       if(result.rowCount === 0) {
         return res.status(404).json({
-          message: "Question not found."
+          message: "Question not found.",
+          data: []
         })
       }
   

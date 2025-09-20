@@ -1,9 +1,9 @@
 import connectionPool from "../utils/db.mjs";
 import { Router } from "express";
 
-const questionAnswer = Router();
+const questionRouter = Router();
 
-questionAnswer.get("/", async (req, res) => {
+questionRouter.get("/", async (req, res) => {
     try{
       const result = await connectionPool.query("SELECT * FROM questions")
     return res.status(200).json({
@@ -16,13 +16,19 @@ questionAnswer.get("/", async (req, res) => {
     }
   });
   
-questionAnswer.post("/", async (req, res) => {
+questionRouter.post("/", async (req, res) => {
     const { title, description, category} = req.body;
+    const trimmedTitle = title?.trim();
+    const trimmedDescription = description?.trim();
+    const trimmedCategory = category?.trim();
     const newQuestion = {
-      ...req.body
+      ...req.body,
+      trimmedTitle,
+      trimmedDescription,
+      trimmedCategory
     }
   
-    if(!title || !description || !category) {
+    if(!trimmedTitle || !trimmedDescription || !trimmedCategory) {
       return res.status(400).json({
         message: "Invalid request data."
       })
@@ -35,14 +41,15 @@ questionAnswer.post("/", async (req, res) => {
           VALUES ($1, $2, $3)
           `,
           [
-            newQuestion.title,
-            newQuestion.description,
-            newQuestion.category
+            newQuestion.trimmedTitle,
+            newQuestion.trimmedDescription,
+            newQuestion.trimmedCategory
           ]
         )
     
         return res.status(201).json({
-          message: "Question created successfully."
+          message: "Question created successfully.",
+          question: result.rows[0]
         })
       }catch(e) {
         return res.status(500).json({
@@ -51,7 +58,7 @@ questionAnswer.post("/", async (req, res) => {
       }
   })
   
-questionAnswer.get("/:id(\\d+)", async (req, res) => {
+questionRouter.get("/:id(\\d+)", async (req, res) => {
     const { id } = req.params;
     try{
       const result = await connectionPool.query(`SELECT * FROM questions WHERE id = $1`,[id])
@@ -73,7 +80,7 @@ questionAnswer.get("/:id(\\d+)", async (req, res) => {
     
   })
   
-questionAnswer.put("/:questionId", async (req, res) => {
+questionRouter.put("/:questionId", async (req, res) => {
     const { questionId } = req.params;
     const {title, description, category} = req.body;
     const newQuestion = {
@@ -92,7 +99,8 @@ questionAnswer.put("/:questionId", async (req, res) => {
         UPDATE questions
         SET title = $1,
             description = $2,
-            category = $3
+            category = $3,
+            updated_at = NOW()
         WHERE id = $4
         `,
         [
@@ -119,7 +127,7 @@ questionAnswer.put("/:questionId", async (req, res) => {
     }
   })
   
-questionAnswer.delete("/:questionId", async (req, res) => {
+questionRouter.delete("/:questionId", async (req, res) => {
     const { questionId } = req.params;
     try{
       const result = await connectionPool.query(
@@ -145,7 +153,7 @@ questionAnswer.delete("/:questionId", async (req, res) => {
     }
   })
   
-questionAnswer.get("/search", async (req, res) => {
+questionRouter.get("/search", async (req, res) => {
     try{
     const titleParam = req.query.title ? `%${req.query.title}%` : null;
     const categoryParam = req.query.category ? `%${req.query.category}%` : null;
@@ -170,4 +178,4 @@ questionAnswer.get("/search", async (req, res) => {
     }
   })
 
-export default questionAnswer;
+export default questionRouter;
