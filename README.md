@@ -43,6 +43,7 @@ GET /questions: Retrieve all questions
 GET /questions/:id: Retrieve a specific question by ID
 
 POST /questions: Create a new question
+
 //payload example {
   "title": "What is the capital of France?",
   "description": "This is a basic geography question asking about the capital city of France.",
@@ -50,6 +51,7 @@ POST /questions: Create a new question
 }
 
 PUT /questions/:questionId: Update an existing question
+
 //payload example {
   "title": "What is the largest planet in our solar system?",
   "description": "This is a basic astronomy question asking about the largest planet by size in the solar system.",
@@ -65,6 +67,7 @@ GET /questions/search: Search questions by title and/or category
 GET /questions/:questionId/answers: Retrieve all answers for a specific question
 
 POST /questions/:questionId/answers: Add a new answer to a question
+
 //payload example {
   "content": "The capital of France is Paris."
 }
